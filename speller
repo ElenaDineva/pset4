@@ -1,0 +1,144 @@
+// Implements a dictionary's functionality
+
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "dictionary.h"
+
+// Represents number of buckets in a hash table
+#define N 26
+
+// Represents a node in a hash table
+typedef struct node
+{
+    char word[LENGTH + 1];
+    struct node *next;
+}
+node;
+
+// Represents a hash table
+node *hashtable[N];
+
+unsigned int word_counter;
+
+// Hashes word to a number between 0 and 25, inclusive, based on its first letter
+unsigned int hash(const char *word)
+{
+    return tolower(word[0]) - 'a';
+    //return a value within the hashtable
+    return hash % N;
+}
+
+// Loads dictionary into memory, returning true if successful else false
+bool load(const char *dictionary)
+{
+    // Initialize hash table
+    for (int i = 0; i < N; i++)
+    {
+        hashtable[i] = NULL;
+    }
+
+    // Open dictionary
+    FILE *file = fopen(dictionary, "r");
+    if (file == NULL)
+    {
+        unload();
+        return false;
+    }
+
+    //initialize word counter to 0
+    word_counter=0;
+
+    // Buffer for a word
+    char word[LENGTH + 1];
+
+    // Insert words into hash table
+    while (fscanf(file, "%s", word) != EOF)
+    {
+        //Malloc a node * for each new word
+        node *new_node = malloc(sizeof(node));
+
+        //if we run out of memory then we have to exit
+        if (new_node == NULL)
+        {
+            unload();
+            return false;
+        }
+        //if succeeded the we can make a new word
+        //copy word into node
+        strcpy(new_node->word, word);
+
+        // add new word to hashtable/ calculate hash value for the added word
+        unsigned int index;
+        index = hash(word);
+        new_node->next = hashtable[index];
+        hashtable[index] = new_node;
+        word_counter++;
+
+    }
+
+    // Close dictionary
+    fclose(file);
+
+    // Indicate success
+    return true;
+}
+
+// Returns number of words in dictionary if loaded else 0 if not yet loaded
+unsigned int size(void)
+{
+    return word_counter;
+}
+
+// Returns true if word is in dictionary else false
+bool check(const char *word)
+{
+    //declares a string to hold a word converted to lowercase for hashing
+    char tword[LENGTH+1];
+
+    int n = strlen(word);
+
+    for(int i=0; i < n+1; i++)
+    {
+        tword[i]=tolower(word[i]);
+    }
+
+    {
+    // nove the pointer to the first element in the hashtable hash'th element
+    node *cursor=hashtable[hash(tword)];
+    while (cursor !=NULL)
+    {
+        //search for a word in a linked list linked to hashtable element
+        if(strcasecmp(cursor->word, word)==0)
+        {
+            return true;
+        }
+        else
+        {
+            cursor = cursor->next;
+        }
+    }
+
+    return false;
+}
+
+// Unloads dictionary from memory, returning true if successful else false
+bool unload(void)
+{
+    // iterate through all linked-lists of hashtable and free nodes
+    for(int i = 0; i < N; i++)
+    {
+        Node *cursor = head;
+        While (cursor != NULL)
+        {
+            Node *temp = cursor;
+            Cursor = cursor->next;
+            Free(temp);
+        }
+    }
+    return true;
+}
+}
